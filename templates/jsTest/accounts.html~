@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block includes %}
+<script type="text/javascript">
+function getUser() {
+    OANDA.account.register('USD', function(userResponse) {
+        var username = userResponse.username;
+        var password = userResponse.password;
+        var accountId = userResponse.accountId;
+        $('#username').html(username);
+        $('#password').html(password);
+        $('#accountId').html(accountId);
+        $('input[name=currentAccount]').val(accountId);
+    });
+}
+
+$(function() {
+    $('#createAccount').click(function(){
+        getUser();
+        $('.response,.account-form').show();
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<h1>Generate Account</h1>
+<button type="button" class="btn btn-primary" id="createAccount">Generate a New Account</button>
+<div class="response">
+    <div>Username: <span id="username"></span></div>
+    <div>Password: <span id="password"></span></div>
+    <div>Account ID: <span id="accountId"></span></div>
+</div>
+<form class="account-form" action="confirmAccount" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="currentAccount" value="">
+    <button type="submit" class="btn btn-primary" id="useAccount">Use This Account</button>
+</form>
+{% endblock %}

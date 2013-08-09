@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block include %}
+<script>
+$(function() {
+	$('.side').each(function() {
+		if ($(this).html() == 'buy') {
+			this.style.color = 'green';
+		} else {
+			this.style.color = 'red';
+		}	
+	});
+});
+</script>
+{% endblock %}
+
+{% block content %}
+{% endblock %}

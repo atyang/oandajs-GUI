@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block includes %}
+<script type="text/javascript">
+function getInstruments() {
+    var instruments = $('#instruments');
+    var rawFields = $('#instruments-form').serializeArray();
+    var fields = [];
+    
+    $.each(rawFields, function(i, v) {
+        fields.push(v.value);
+    });
+    
+    instruments.html('');
+    
+    OANDA.rate.instruments(fields,function(response) {
+        var pair = response.instruments;
+        $.each(pair, function(i, v) {
+            instruments.append('<button type="button" class="btn inline-btn pairs-btn" id="pair-'+i+'">'
+                                +v.instrument+'</button><div class="pair-info" id="pair-info-'+i+'"></div>');
+            $.each(v, function(name, value) {
+                $('#pair-info-'+i).append('<div>'+name+': '+value+'</div>');
+            });            
+            $('#pair-'+i).bind('click', function() {
+                $('#pair-info-'+i).slideToggle('slow');
+            });
+            instruments.show();
+        });
+    });
+}
+
+function getQuotes() {
+    var symbols = $('#pairsToQuote').val().split(',');    
+    var quotes = $('#quotes');
+    
+    quotes.html('');
+    
+    OANDA.rate.quote(symbols, function(response) {
+        var price = response.prices;
+        $.each(price, function(i, v) {
+            $.each(v, function(name, value) {
+                quotes.append('<div>'+name+': '+value+'</div>');
+            });            
+        });
+        quotes.slideDown();
+    });
+}
+
+$(function() {
+    $('#getList').click(function(){
+        getInstruments();
+    });
+    
+    $('#getQuotes').click(function(){
+        getQuotes();
+    });
+    
+    $('.hide-toggle').click(function(e){
+        e.preventDefault();
+        var cur = $(this);
+        
+        $(cur.attr('href')).slideToggle();
+        if (cur.html() == 'hide') {
+            cur.html('show');
+        } else {
+            cur.html('hide');
+        }
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<h1>Get Instruments and Rates</h1>
+<div class="row-fluid">
+    <div class="span4 info-div">
+        <h2>Instruments</h2>
+        <form id="instruments-form">
+            <div class="inline-div"><input type="checkbox" class="instr-checkbox" name="fields" value="displayName">displayName</div>
+            <div class="inline-div"><input type="checkbox" class="instr-checkbox" name="fields" value="pip">pip</div>
+            <div class="inline-div"><input type="checkbox" class="instr-checkbox" name="fields" value="maxTradeUnits">maxTradeUnits</div>
+            <div class="inline-div"><input type="checkbox" class="instr-checkbox" name="fields" value="precision">precision</div>
+            <div class="inline-div"><input type="checkbox" class="instr-checkbox" name="fields" value="maxTrailingStop">maxTrailingStop</div>
+            <div class="inline-div"><input type="checkbox" class="instr-checkbox" name="fields" value="minTrailingStop">minTrailingStop</div>
+            <div class="inline-div"><input type="checkbox" class="instr-checkbox" name="fields" value="marginRate">marginRate</div>
+        </form>
+        <button type="button" class="btn btn-primary inline-btn" id="getList">Get Instruments List</button>
+        <a href="#instruments" class="hide-toggle">hide</a>
+        <div id="instruments"></div>
+    </div>
+    <div class="span4 info-div">
+        <h2>Quotes</h2>
+        <input type="text" id="pairsToQuote">
+        <button type="button" class="btn btn-primary inline-btn" id="getQuotes">Get Quotes</button>
+        <a href="#quotes" class="hide-toggle">hide</a>
+        <div id="quotes"></div>
+    </div>
+    <div class="span4 info-div">
+        <h2>History</h2>
+        <button type="button" class="btn btn-primary inline-btn" id="getHistory">Get Candle History</button>
+        <a href="#history" class="hide-toggle">hide</a>
+        <div id="history"></div>
+    </div>
+</div>
+{% endblock %}

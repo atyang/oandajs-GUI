@@ -1,0 +1,27 @@
+@media (min-width: 980px) {
+    body {
+        padding-top: 60px;
+    }
+}
+
+.oa-full-width {
+    width: 100%;
+}
+
+.oa-container {
+    text-align: center;
+}
+
+#currencyInput {
+    margin-bottom: 0px;
+}
+
+#createAccountBtn {
+    display: inline-block;
+    margin: 0px 0px 0px 4px;
+    float: none;
+}
+
+#accountSummary {
+    border: 1px solid #ddd;
+}
