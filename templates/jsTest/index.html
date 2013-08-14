@@ -1,23 +1,179 @@
 {% extends "api_base.html" %}
 
-{% block trades %}
-<h1>Trades</h1>
-<p>List all trades here, maybe in an iframe or something scrollable? Don't forget to include the option to switch
-to orders, positions, transactions, etc. like the Java GUI.</p>
+{% block account %}
+   <form id="createAccountForm" onSubmit="createAccount(this);return false;">
+        <input type="text" id="currencyInput" class="span3 oa-full-width" name="currency" placeholder="Currency">
+        <button type="submit" id="createAccountBtn" class="span9 btn oa-full-width">Create and Use Account</button>
+    </form>
+    <form id="useAccount" action="useAccount" method="POST">        
+        {% csrf_token %}                
+        <input type="hidden" id="accountId" name="account_id" value="{{ account_id }}">
+    </form>
+    <table id="accountSummary" class="table table-striped table-condensed">
+        <thead>
+            <tr>
+                <th id="accountName"></th>
+                <th id="accountCurrency"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Balance:</td>
+                <td id="balance"></td>
+            </tr>
+            <tr>
+                <td>Unrealized P&L:</td>
+                <td id="unrealizedPl"></td>
+            </tr>
+            <tr>
+                <td>Realized P&L:</td>
+                <td id="realizedPl"></td>
+            </tr>
+            <tr>
+                <td>Open Trades:</td>
+                <td id="openTrades"></td>
+            </tr>
+            <tr>
+                <td>Open Orders:</td>
+                <td id="openOrders"></td>
+            </tr>
+            <tr>
+                <td>Margin Used:</td>
+                <td id="marginUsed"></td>
+            </tr>
+            <tr>
+                <td>Margin Available:</td>
+                <td id="marginAvail"></td>
+            </tr>
+            <tr>
+                <td>Margin Rate:</td>
+                <td id="marginRate"></td>
+            </tr>
+            <tr>
+                <td>Account Number:</td>
+                <td id="accountId"></td>
+            </tr>
+        </tbody>
+    </table>
 {% endblock %}
 
-{% block rates %}
-<h1>Rates</h1>
-<p>List all the rates here, in a similar style to the Web GUI rates page.</p>
+{% block side %}
+    {% if focus_trades %}
+        <div id="rates">
+            <h1>Rates</h1>
+            <p>List all the rates here, in a similar style to the Web GUI rates page.</p>
+        </div>
+    {% else %}
+        <div id="txListContainer">
+            <div id="listType" class="btn-group oa-full-width">
+                <div class="btn active">Trades</div>
+                <div class="btn">Orders</div>
+            </div>
+            <div id="txList">
+                <input type="hidden" name="listType" value="trades">
+                <div id="tradeTemplate" class="openTrade">
+                    <div>
+                        <div>
+                            <span class="instrument"></span>
+                            <span class="units"></span> units
+                            <span class="oa-close-btn">
+                                <span class="profit"></span>
+                                <i class="icon-remove"></i>
+                            </span>
+                        </div>
+                        <div>
+                            <span class="side"></span> @
+                            <span class="price"></span>
+                            TP: <span class="takeProfit"></span>
+                            SL: <span class="stopLoss"></span>
+                            TS: <span class="trailingStop"></span>
+                        </div>
+                    </div>
+                </div>                
+                <div id="orderTemplate" class="openTrade">
+                    <div>
+                        <div>
+                            <span class="instrument"></span>
+                            <span class="units"></span> units
+                            <span class="oa-close-btn">
+                                <span class="distance"></span>
+                                <i class="icon-remove"></i>
+                            </span>
+                        </div>
+                        <div>
+                            <span class="side"></span> <span class="type"></span> @
+                            <span class="price"></span>
+                            Expires: <span class="expiry"></span>
+                            TP: <span class="takeProfit"></span>
+                            SL: <span class="stopLoss"></span>
+                            TS: <span class="trailingStop"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}    
+{% endblock %}
+
+{% block focus %}
+    {% if focus_trades %}
+        <div id="trades">
+            <h1>Trades</h1>
+            <p>List all trades here, maybe in an iframe or something scrollable? Don't forget to include the option to switch
+            to orders, positions, transactions, etc. like the Java GUI.</p>
+        </div>   
+    {% else %}    
+        <div id="rates">
+            <h1>Rates</h1>
+            <p>List all the rates here, in a similar style to the Web GUI rates page.</p>
+        </div>
+    {% endif %}
 {% endblock %}
 
 {%block createTrade %}
-<h1>Create Trade</h1>
-<p>Simple form to create trades here. Don't forget to add the option to switch to orders.</p>
-<br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+    <form id="tradeForm" onSubmit="tradeAction(this);return false;">
+    
+        <input type="hidden" id="txType" name="transaction_type" value="trade">
+        <div id="transactionType" class="btn-group">
+            <div class="btn txType btn-info active">Trade</div>
+            <div class="btn txType">Order</div>
+        </div>
+    
+        <select id="pairSelector" name="instrument"></select>
+
+        <input type="hidden" name="side">
+        <div class="btn-group" id="transactionSide">
+            <div class="btn">Sell</div>
+            <div class="btn">Buy</div>
+        </div>
+        
+        <select id="typeSelector" name="type" class="orderParam">
+            <option value="marketIfTouched">Market If Touched Order</option>
+            <option value="limit">Limit Order</option>
+            <option value="stop">Stop Order</option>
+        </select>
+
+        <div id="tradeFields">
+            <div id="required">
+                <input type="text" name="units" placeholder="Units">
+                <input type="text" name="price" placeholder="Price" class="orderParam">
+                <input type="text" name="expiry" placeholder="Expiry" class="orderParam">
+            </div>
+            
+            <div id="optional">
+                <input type="text" name="takeProfit" placeholder="Take Profit">
+                <input type="text" name="stopLoss" placeholder="Stop Loss">
+                <input type="text" name="trailingStop" placeholder="Trailing Stop">
+                <input type="text" name="lowerBound" placeholder="Lower Bound" class="orderParam">
+                <input type="text" name="upperBound" placeholder="Upper Bound" class="orderParam">
+            </div>
+        </div>
+                
+        <button type="submit" class="btn">Submit</button>
+    </form>
 {% endblock %}
 
 {% block candles %}
-<h1>Candles</h1>
-<p>Candlestick graph here.</p>
+    <h1>Candles</h1>
+    <p>Candlestick graph here.</p>
 {% endblock %}

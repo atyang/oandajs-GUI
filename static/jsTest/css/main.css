@@ -12,16 +12,149 @@
     text-align: center;
 }
 
+.hidden.noBlock {
+    display: none;
+}
+
+#leftSide {
+    min-width: 250px;
+}
+
+#createAccountForm, #useAccount {
+    margin: 0px 0px 5px;
+}
+
 #currencyInput {
-    margin-bottom: 0px;
+    margin: 0px;
 }
 
 #createAccountBtn {
     display: inline-block;
-    margin: 0px 0px 0px 4px;
-    float: none;
+    margin: 0px;
+    float: right;
+}
+
+#focusSelector {
+    margin: 0px;
 }
 
 #accountSummary {
-    border: 1px solid #ddd;
+    border: 1px solid #ccc;
 }
+
+#createTrade {
+    border: 1px solid #ccc;
+}
+
+#tradeForm {
+    width: 100%;
+    margin: auto;
+    padding: 0px 0px 10px 0px;
+}
+
+#transactionType {
+    display: block;
+    width: 100%;
+    margin: 0px 0px 10px 0px;
+}
+
+#transactionType div:first-child {
+    border-left: none;
+    border-right: 1px;
+}
+
+#transactionType div {
+    border-radius: 0px;
+    border-top: none;
+    padding: 4px 0px;
+}
+
+#pairSelector {
+    width: 110px;
+    margin: auto;
+}
+
+#transactionSide {
+    display: block;
+    width: 220px;
+    margin: 10px auto;
+}
+
+#transactionSide div {
+    width: 84px;
+}
+
+#typeSelector {
+    display: block;
+    margin: 10px auto 0px;
+}
+
+#typeSelector.hidden {
+    display: none;
+}
+
+#tradeFields {
+    display: block;
+    width: 220px;
+    margin: 10px auto 0px;
+}
+
+#tradeFields input {
+    width: 94px;
+}
+
+#required, #optional {
+    display: inline-block;
+    width: 108px;
+    vertical-align: text-top;
+}
+
+#txListContainer {
+    border: 1px solid #ccc;
+}
+
+#txList {
+    height: 300px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    background-color: #eee;
+}
+
+#txListContainer .btn-group .btn:first-child {
+    margin-right: 1px;
+    border-right: 1px solid #ccc;
+}
+
+#txListContainer .btn-group .btn {
+    padding: 2px 0px;
+    border-radius: 0px;
+    border: none;
+    border-bottom: 1px solid #ccc
+}
+
+#tradeTemplate, #orderTemplate {
+    display: none;
+}
+
+.openTrade {
+    padding: 5px;
+    font-size: 14px;
+    color: #676767;
+    border-bottom: 1px solid #ddd;
+    background-color: #fefefe;
+}
+
+.openTrade .instrument {
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.instrument, .price, .expiry, .takeProfit, .stopLoss {
+    margin-right: 8px;
+}
+
+.oa-close-btn {
+    float: right;
+    opacity: 0.65;
+}
+
