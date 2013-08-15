@@ -1,27 +1,48 @@
 // Constants per account
+var EPSILON = 0.000001;
 var pairsList = [];
 var activeAccountId;
 var accSummaryFields;
+var pairsSelectedList = [ 'EUR_USD', 'USD_CAD', 'AUD_USD', 'GBP_USD', 'EUR_JPY', 'USD_JPY' ]
+var $pairsSelected;
+var $pairsNotSelected;
+var $ratesList;
+var $rateTemplate;
 var $txList;
 var $tradeTemplate;
 var $orderTemplate;
 var openTradeFields;
 var openOrderFields;
 var refreshTime = 500;
+var GREEN = 'rgb(0,220,0)';
+var RED = 'rgb(255,0,0)';
 
 // Misc
+jQuery.fn.highlight = function(color) {
+    this.animate({color:color}, 200).delay(400).animate({color:'#000'}, 200);
+}
+
+function priceIncrease(oldPrice, newPrice) {
+    return ((newPrice - oldPrice) > EPSILON)
+}
+
 function resizeSidesContent($lSide, $rSide, $lObj) {
     var lWidth = $lSide.width();
     var rWidth = $rSide.width();
     
-    if($('#rightSide #txListContainer').length != 0) {
-        $('#rightSide .btn-group .btn').width((rWidth-3)/2);
+    if ($('#trades #txListContainer').length != 0) {
+        $('#trades .btn-group .btn').width((rWidth-3)/2);
     }
     
     $lObj.find('.btn.txType').width((lWidth-2)/2);
 }
 
 // Account functions
+function startAccount() {
+    getAccountInfo();
+    updateAccountInfo();
+}
+
 function getDisplayedAccountFields($table) {
     var fieldsList = {};
     
@@ -34,13 +55,31 @@ function getDisplayedAccountFields($table) {
 
 function updateAccountInfo() {
     return setInterval(function() {
-        if(activeAccountId != '') {
+        if (activeAccountId != '') {
             getAccountInfo();
         }
     }, refreshTime);
 }
 
+function changePLColor(pl) {
+    if (pl.innerHTML.indexOf('-') == -1) {
+        pl.style.color = GREEN;
+    } else {
+        pl.style.color = RED;
+    }
+}
+
 // Trading form functions
+function setOpenTxSideAndType() {
+    $('.orderParam').hide();
+    $('#transactionSide div').bind('click',function() {
+        setTxSide(this);
+    });
+    $('#transactionType div').bind('click',function() {
+        setTxType(this);
+    });
+}
+
 function printPairForTrade($selector, pair) {
     $selector.append('<option value="'+pair.instrument+'">'+pair.displayName+'</option>');
 }
@@ -48,8 +87,7 @@ function printPairForTrade($selector, pair) {
 function toggleOrderParams(txType) {
     if (txType == 'order') {
         $('.orderParam').fadeIn();
-    }
-    else {        
+    } else {        
         $('.orderParam').fadeOut();
     }        
 }
@@ -71,21 +109,18 @@ function setTxSide(sideBtn) {
     $(sideBtn).parent().find('.active').attr('class','btn');
     if (side == 'buy') {
         sideBtn.className += ' active btn-success';
-    }
-    else {
+    } else {
         sideBtn.className += ' active btn-danger';
     }
 }
 
 function alertResponse(response, type) {
-    if(response.error) {
-        alert(response.error.message);
-    }
-    else {
-        if(type == 'trade') {
+    if (response['error']) {
+        alert(response['error'].message);
+    } else {
+        if (type == 'trade') {
             getTradeList();
-        }
-        else {
+        } else {
             getOrderList();
         }
         
@@ -98,26 +133,145 @@ function tradeAction(form) {
     var allowedOptParams = [ 'takeProfit', 'stopLoss', 'trailingStop', 'lowerBound', 'upperBound' ]
     
     $.each($(form).serializeArray(), function(i, obj) {
-        if(allowedOptParams.indexOf(obj.name) != -1) {
-            if(obj.value != '') {
+        if (allowedOptParams.indexOf(obj.name) != -1) {
+            if (obj.value != '') {
                 opt[obj.name] = obj.value;
             }
-        }
-        else {
+        } else {
             data[obj.name] = obj.value;
         }
     });    
     data['opt'] = opt;
 
-    if(data['transaction_type'] == 'trade') {
+    if (data['transaction_type'] == 'trade') {
         createTrade(data);
-    }
-    else if(data['transaction_type'] == 'order') {
+    } else if (data['transaction_type'] == 'order') {
         createOrder(data);
     }
 }
 
+// Rates List functions
+function startRates() {
+    getRates();
+    runRates = updateRates();
+    toggleRatesSelector();
+}
+
+function printPairToSelect(obj) {
+    $pairsNotSelected.append('<option value="'+obj.instrument+'">'+obj.displayName+'</options>');
+}
+
+function toggleRatesSelector() {
+    $('#rates .toggle').bind('click',function() {
+        $('#ratesSelector').slideToggle();
+    });
+}
+
+function updateSelectedPairsForm(list, $dest) {
+    $.each(list, function() {
+        $(this).prop('selected',false).appendTo($dest);
+    });
+}
+
+function addPair() {
+    updateSelectedPairsForm($pairsNotSelected.find('option:selected'), $pairsSelected);
+}
+
+function removePair() {
+    updateSelectedPairsForm($pairsSelected.find('option:selected'), $pairsNotSelected);
+}
+
+function addAllPairs() {
+    updateSelectedPairsForm($pairsNotSelected.find('*'), $pairsSelected);
+}
+
+function removeAllPairs() {
+    updateSelectedPairsForm($pairsSelected.find('*'), $pairsNotSelected);
+}
+
+function updateSelectedPairsList() {
+    pairsSelectedList = [];
+    $('#ratesSelector').slideUp();
+    
+    $pairsSelected.find('option').each(function(i, obj) {
+        pairsSelectedList.push(obj.getAttribute('value'));
+    });
+    
+    $ratesList.find('.pair-rate').each(function() {
+        if (pairsSelectedList.indexOf(this.id) == -1) {
+            this.remove();
+        }
+    });
+}
+
+function formatPrice(price) {
+    var dotAtSup = (price.length - price.indexOf('.')) > 2 ? false : true;
+    
+    var supIndex = dotAtSup ? -2 : -1;
+    var boldIndex = dotAtSup ? -4: -3;
+    
+    return { 'sup': sup = price.slice(supIndex, price.length), 'bold' : price.slice(boldIndex, supIndex), 'small' : price.slice(0, boldIndex) };
+}
+
+function printPrice(price, $priceDiv) {
+    $priceDiv.find('.old-price').html(price);
+    
+    $.each(formatPrice(price), function(i, value) {
+        $priceDiv.find(i).html(value);
+    });
+}
+
+function updatePrice(price, $priceDiv) {
+    var oldPrice = $priceDiv.find('.old-price').html();
+    
+    if (oldPrice != price) {
+        printPrice(price, $priceDiv);
+        if(priceIncrease(parseFloat(oldPrice),parseFloat(price))) {
+            $priceDiv.highlight('rgb(0,220,0)');
+        } else {
+            $priceDiv.highlight(RED);
+        }
+    }
+}
+
+function printRate(data, instrument) {
+    var $newRate = $rateTemplate.clone().removeAttr('id');
+    
+    printPrice(data['ask'].toString(), $newRate.find('.ask'));
+    printPrice(data['bid'].toString(), $newRate.find('.bid'));
+    
+    $newRate.find('.instrument').html(instrument.replace('_','/'));
+    $newRate.attr('id',instrument).appendTo($ratesList);
+}
+
+function updateRate($obj, data) {
+    updatePrice(data['ask'].toString(), $obj.find('.ask'));
+    updatePrice(data['bid'].toString(), $obj.find('.bid'));
+}
+
+function printOrUpdateRate(pair) {
+    var instr = pair['instrument'];
+    var $instrDiv = $('#'+instr);
+    
+    if($instrDiv.length < 1) {
+        printRate(pair, instr);
+    } else {
+        updateRate($instrDiv, pair);
+    }
+}
+
+function updateRates() {
+    return setInterval (function() {
+        getRates();
+    }, refreshTime);
+}
+
 // Transaction List functions
+function startList() {
+    getTradeList();
+    setListType();
+}
+
 function getOpenTradeFields($trade) {
     var fieldsList = [];
     
@@ -138,33 +292,40 @@ function getOpenOrderFields($order) {
     return fieldsList;
 }
 
-function setListType(listTypeBtn) {
-    var type = listTypeBtn.innerHTML.toLowerCase();
+function setListType() {
+    $('#listType div').bind('click',function() {
+        var type = this.innerHTML.toLowerCase();
     
-    $('input[name=listType]').val(type);    
-    $(listTypeBtn).parent().find('.active').attr('class','btn');
-    listTypeBtn.className += ' active';
-    
-    getList(type);
+        $('input[name=listType]').val(type);    
+        $(this).parent().find('.active').attr('class','btn');
+        this.className += ' active';
+        
+        getList(type);
+    });
 }
 
 function getList(type) {
     if (type == 'trades') {
         getTradeList();
-    }
-    else {
+    } else {
         getOrderList();
     }
 }
 
-function printForList(fields, obj, $newTx) {
+function buildNewTx(fields, obj, $newTx) {
     $.each(fields, function(i, param) {
-        if(obj[param] == 'buy') {
+        var value = obj[param];
+        
+        if (param == 'instrument') {
+            value = obj[param].replace('_','/');
+        }
+
+        if (value == 'buy') {
             $newTx.find('.side').html('Long');
-        } else if (obj[param] == 'sell') {
+        } else if (value == 'sell') {
             $newTx.find('.side').html('Short');
         } else {
-            $newTx.find('.'+param).html(obj[param]);
+            $newTx.find('.'+param).html(value);
         }
     });
     
@@ -173,14 +334,14 @@ function printForList(fields, obj, $newTx) {
 
 function printOpenTrade(trade) {
     var $newTrade = $tradeTemplate.clone().removeAttr('id');
-    printForList(openTradeFields, trade, $newTrade);
+    buildNewTx(openTradeFields, trade, $newTrade);
     
     $newTrade.appendTo($txList);
 }
 
 function printOpenOrder(order) {
     var $newOrder = $orderTemplate.clone().removeAttr('id');
-    printForList(openTradeFields, order, $newOrder);
+    buildNewTx(openTradeFields, order, $newOrder);
 
     $newOrder.appendTo($txList);
 }
@@ -188,9 +349,9 @@ function printOpenOrder(order) {
 function changeSideColor() {
     $('#txList span.side').each(function() {
         if (this.innerHTML == 'Long') {
-            this.style.color = 'green';
+            this.style.color = GREEN;
         } else {
-            this.style.color = 'red';
+            this.style.color = RED;
         }
     });
 }
@@ -199,7 +360,7 @@ function changeSideColor() {
 function createAccount(form) {
     var currency = $(form).serializeArray()[0].value || 'USD';
     OANDA.account.register(currency, function(response) {
-        $('#accountId').val(response.accountId);
+        $('#accountId').val(response['accountId']);
         $('#useAccount').submit();
     });
 }
@@ -208,19 +369,32 @@ function getAccountInfo() {
     OANDA.account.listSpecific(activeAccountId, function(response) {
         $.each(accSummaryFields, function(i, obj) {
             $(obj).html(response[i]);
+            if (i == 'unrealizedPl' || i == 'realizedPl') {
+                changePLColor(obj);
+            }
         });
     });
 }
 
 function getPairsList() {    
     OANDA.rate.instruments(['displayName'], function(response) {
-        var $selector = $('#pairSelector');        
+        var $tradeSelector = $('#pairSelector'); 
 
-        $.each(response.instruments, function(i, obj) {
-            pairsList[i] = obj;
-            printPairForTrade($selector, obj);
+        $.each(response['instruments'], function(i, obj) {
+            printPairForTrade($tradeSelector, obj);
+            printPairToSelect(obj);
         });
     });
+}
+
+function getRates() {
+    if (pairsSelectedList.length != 0) {
+        OANDA.rate.quote(pairsSelectedList, function(response) {
+            $.each(response['prices'], function(i, obj) {
+                printOrUpdateRate(obj);
+            });
+        });
+    }
 }
 
 function getTradeList() {
@@ -263,41 +437,34 @@ function createOrder(d) {
     });
 }
 
+function windowResize() {    
+    var $left = $('#leftSide');
+    var $trades = $('#trades');
+    var $txType = $('#tradeForm');
+    resizeSidesContent($left, $trades, $txType);
+    $(window).bind('resize',function() {
+        resizeSidesContent($left, $trades, $txType);
+    });
+}
+
 // After document loads
 $(function() {
     getPairsList(pairsList);
     activeAccountId = $('#accountId').val();    
     accSummaryFields = getDisplayedAccountFields($('#accountSummary'));
+    $pairsSelected = $('#pairsSelected');
+    $pairsNotSelected = $('#pairsNotSelected');
+    $ratesList = $('#ratesList');
     $txList = $('#txList');
+    $rateTemplate = $('#rateTemplate');
     $tradeTemplate = $('#tradeTemplate');
     $orderTemplate = $('#orderTemplate');    
     openTradeFields = getOpenTradeFields($tradeTemplate);
     openOrderFields = getOpenOrderFields($orderTemplate);
     
-    //make sure elements in leftSide and rightSide have the proper width
-    var $left = $('#leftSide');
-    var $right = $('#rightSide');
-    var $txType = $('#tradeForm');
-    resizeSidesContent($left, $right, $txType);
-    $(window).resize(function() {
-        resizeSidesContent($left, $right, $txType);
-    });  
-    
-    getAccountInfo();
-    //var run = updateAccountInfo();
-    
-    //update tradeList
-    getTradeList();
-    $('#listType div').click(function() {
-        setListType(this);
-    });
-    
-    //trading form style and setting certain inputs
-    $('.orderParam').hide();    
-    $('#transactionSide div').click(function() {
-        setTxSide(this);
-    });    
-    $('#transactionType div').click(function() {
-        setTxType(this);
-    });
+    windowResize();    
+    startAccount();
+    setOpenTxSideAndType();
+    startRates();
+    startList();
 });

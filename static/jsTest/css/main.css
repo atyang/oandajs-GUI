@@ -34,10 +34,6 @@
     float: right;
 }
 
-#focusSelector {
-    margin: 0px;
-}
-
 #accountSummary {
     border: 1px solid #ccc;
 }
@@ -129,32 +125,122 @@
     padding: 2px 0px;
     border-radius: 0px;
     border: none;
-    border-bottom: 1px solid #ccc
+    border-bottom: 1px solid #ccc;
 }
 
 #tradeTemplate, #orderTemplate {
     display: none;
 }
 
-.openTrade {
+#txList .openTrade {
     padding: 5px;
     font-size: 14px;
     color: #676767;
     border-bottom: 1px solid #ddd;
-    background-color: #fefefe;
+    background-color: #fff;
 }
 
-.openTrade .instrument {
+#txList .instrument {
     font-size: 15px;
     font-weight: bold;
 }
 
-.instrument, .price, .expiry, .takeProfit, .stopLoss {
+#txList .instrument, #txList .price, #txList .expiry, #txList .takeProfit, #txList .stopLoss {
     margin-right: 8px;
 }
 
-.oa-close-btn {
+#txList .oa-close-btn {
     float: right;
     opacity: 0.65;
 }
 
+#rates form {
+    margin: 0px;
+}
+
+#focusSelector {
+    margin: 0px;
+}
+
+#rates #ratesSelector {
+    margin: 7px 0px 0px 0px;
+}
+
+#rates #ratesListContainer {
+    margin: 7px 0px;    
+    border: 1px solid #ccc;
+    max-height: 810px;
+    overflow-y: scroll;
+}
+
+#rates #pairsNotSelected, #rates #pairsSelected {
+    height: 300px;
+    margin: 0px 10px;
+}
+
+#rates .rates-selector-btn-container {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+#rates .rates-selector-btn {
+    display: block;
+    width: 125px;
+    margin-top: 5px;
+}
+
+#rates #ratesForm {
+    display: inline-block;
+}
+
+#ratesList #rateTemplate {
+    display: none;
+}
+
+#ratesList .pair-rate {
+    display: inline-block;
+    width: 46%;
+    min-width: 164px;
+    margin: 4px;
+    border: 1px solid #ddd;
+    padding: 6px;
+    text-align: left;
+}
+
+#ratesList .instrument {
+    display: inline-block;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+#ratesList .prices {
+    display: inline-block;
+    float: right;
+}
+
+#ratesList .ask {
+    display: inline-block;
+    margin-right: 20px;
+}
+
+#ratesList .bid {
+    display: inline-block;
+}
+
+#ratesList .old-price {
+    display: none;
+}
+
+#ratesList small {
+    font-size: 11px;
+}
+
+#ratesList bold {
+    font-size: 20px;
+    margin: 0px 2px;
+    font-weight: bold;
+}
+
+.ask div {
+    font-size: 10px;
+}

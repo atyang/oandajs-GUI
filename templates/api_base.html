@@ -8,6 +8,7 @@
 	<link rel="stylesheet" type="text/css" href="{% static "jsTest/bootstrap/css/bootstrap.min.css" %}" />
 	<link rel="stylesheet" type="text/css" href="{% static "jsTest/css/main.css" %}" />
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script type="text/javascript" src="http://code.jquery.com/color/jquery.color-2.1.2.min.js"></script>
 	<script type="text/javascript" src="{% static "jsTest/bootstrap/js/bootstrap.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "jsTest/js/oanda.js" %}"></script>
 	{% block includes %}{% endblock %}
@@ -38,25 +39,13 @@
                 </div>
 	        </div>
 	        
-            <div id="focus" class="span4 oa-container">
-                <form method="post" action="setFocus">
-                    {% csrf_token %}
-                    <select id="focusSelector" name="focus_trades">                    
-                        <option value="rates">Rates</option>
-                        <option value="trades">Trades</option>
-                    </select>
-                    <button type="submit" class="btn">Switch</button>
-                </form>
-                {% if focus_trades %}
-                    <script type="text/javascript">$('option[value=trades]').attr('selected','');</script>
-                {% endif %}
-                
-                {% block focus %}Missing rates information block.{% endblock %}
+            <div id="rates" class="span5 oa-container">                
+                {% block rates %}Missing rates information block.{% endblock %}
             </div>
             
-            <div class="span5">    
-                <div id="rightSide">
-                    {% block side %}Missing trades information block.{% endblock %}
+            <div class="span4">    
+                <div id="trades">
+                    {% block trades %}Missing trades information block.{% endblock %}
                 </div>
                 <div id="candles">             
                     {% block candles %}Missing candlestick graph.{% endblock %}

@@ -3,7 +3,7 @@
 {% block account %}
    <form id="createAccountForm" onSubmit="createAccount(this);return false;">
         <input type="text" id="currencyInput" class="span3 oa-full-width" name="currency" placeholder="Currency">
-        <button type="submit" id="createAccountBtn" class="span9 btn oa-full-width">Create and Use Account</button>
+        <input type="submit" id="createAccountBtn" class="span9 btn oa-full-width" value="Create and Use Account" />
     </form>
     <form id="useAccount" action="useAccount" method="POST">        
         {% csrf_token %}                
@@ -57,77 +57,84 @@
     </table>
 {% endblock %}
 
-{% block side %}
-    {% if focus_trades %}
-        <div id="rates">
-            <h1>Rates</h1>
-            <p>List all the rates here, in a similar style to the Web GUI rates page.</p>
+{% block trades %}
+    <div id="txListContainer">
+        <div id="listType" class="btn-group oa-full-width">
+            <div class="btn active">Trades</div>
+            <div class="btn">Orders</div>
         </div>
-    {% else %}
-        <div id="txListContainer">
-            <div id="listType" class="btn-group oa-full-width">
-                <div class="btn active">Trades</div>
-                <div class="btn">Orders</div>
-            </div>
-            <div id="txList">
-                <input type="hidden" name="listType" value="trades">
-                <div id="tradeTemplate" class="openTrade">
+        <div id="txList">
+            <input type="hidden" name="listType" value="trades">
+            <div id="tradeTemplate" class="openTrade">
+                <div>
                     <div>
-                        <div>
-                            <span class="instrument"></span>
-                            <span class="units"></span> units
-                            <span class="oa-close-btn">
-                                <span class="profit"></span>
-                                <i class="icon-remove"></i>
-                            </span>
-                        </div>
-                        <div>
-                            <span class="side"></span> @
-                            <span class="price"></span>
-                            TP: <span class="takeProfit"></span>
-                            SL: <span class="stopLoss"></span>
-                            TS: <span class="trailingStop"></span>
-                        </div>
+                        <span class="instrument"></span>
+                        <span class="units"></span> units
+                        <span class="oa-close-btn">
+                            <span class="profit"></span>
+                            <i class="icon-remove"></i>
+                        </span>
                     </div>
-                </div>                
-                <div id="orderTemplate" class="openTrade">
                     <div>
-                        <div>
-                            <span class="instrument"></span>
-                            <span class="units"></span> units
-                            <span class="oa-close-btn">
-                                <span class="distance"></span>
-                                <i class="icon-remove"></i>
-                            </span>
-                        </div>
-                        <div>
-                            <span class="side"></span> <span class="type"></span> @
-                            <span class="price"></span>
-                            Expires: <span class="expiry"></span>
-                            TP: <span class="takeProfit"></span>
-                            SL: <span class="stopLoss"></span>
-                            TS: <span class="trailingStop"></span>
-                        </div>
+                        <span class="side"></span> @
+                        <span class="price"></span>
+                        TP: <span class="takeProfit"></span>
+                        SL: <span class="stopLoss"></span>
+                        TS: <span class="trailingStop"></span>
+                    </div>
+                </div>
+            </div>                
+            <div id="orderTemplate" class="openTrade">
+                <div>
+                    <div>
+                        <span class="instrument"></span>
+                        <span class="units"></span> units
+                        <span class="oa-close-btn">
+                            <span class="distance"></span>
+                            <i class="icon-remove"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <span class="side"></span> <span class="type"></span> @
+                        <span class="price"></span>
+                        TP: <span class="takeProfit"></span>
+                        SL: <span class="stopLoss"></span>
+                        TS: <span class="trailingStop"></span>
                     </div>
                 </div>
             </div>
         </div>
-    {% endif %}    
+    </div>  
 {% endblock %}
 
-{% block focus %}
-    {% if focus_trades %}
-        <div id="trades">
-            <h1>Trades</h1>
-            <p>List all trades here, maybe in an iframe or something scrollable? Don't forget to include the option to switch
-            to orders, positions, transactions, etc. like the Java GUI.</p>
-        </div>   
-    {% else %}    
-        <div id="rates">
-            <h1>Rates</h1>
-            <p>List all the rates here, in a similar style to the Web GUI rates page.</p>
+{% block rates %}
+    <div class="btn toggle">Select Pairs</div>
+    <div id="ratesSelector" style="display:none;">
+        <select id="pairsNotSelected" multiple="multiple">
+        </select>
+        <div class="rates-selector-btn-container">
+            <input type="button" class="btn rates-selector-btn" value="Add &gt;" onclick="addPair()" />
+            <input type="button" class="btn rates-selector-btn" value="Add All &gt;&gt;" onclick="addAllPairs()" />
+            <input type="button" class="btn rates-selector-btn" value="&lt; Remove" onclick="removePair()" />
+            <input type="button" class="btn rates-selector-btn" value="&lt;&lt; Remove All" onclick="removeAllPairs()" />
+            <input type="submit" class="btn rates-selector-btn" value="Update" form="ratesForm" />
         </div>
-    {% endif %}
+        <form id="ratesForm" onSubmit="updateSelectedPairsList();return false;">
+            <select id="pairsSelected" name="pairsSelected" multiple="multiple">
+            </select>
+        </form>
+    </div>
+    <div id="ratesListContainer">
+        <div id="ratesList">
+            <div id="rateTemplate" class="pair-rate">
+                <div class="instrument"></div>
+                <div class="prices">
+                    <div class="ask"><div class="old-price"></div><small></small><bold></bold><sup></sup></div>
+                    <div class="bid"><div class="old-price"></div><small></small><bold></bold><sup></sup></div>
+                </div>
+            </div>
+        </div>                
+    </div>
 {% endblock %}
 
 {%block createTrade %}
@@ -169,7 +176,7 @@
             </div>
         </div>
                 
-        <button type="submit" class="btn">Submit</button>
+        <input type="submit" class="btn" value="Submit" />
     </form>
 {% endblock %}
 
