@@ -1,6 +1,7 @@
 @media (min-width: 980px) {
     body {
         padding-top: 60px;
+        overflow-y: scroll;
     }
 }
 
@@ -91,18 +92,42 @@
 
 #tradeFields {
     display: block;
-    width: 220px;
+    width: 280px;
     margin: 10px auto 0px;
 }
 
-#tradeFields input {
-    width: 94px;
+#required {
+    display: inline-block;
+    width: 150px;
+    vertical-align: text-top;
 }
 
-#required, #optional {
+#required .add-on {
+    width: 40px;
+}
+
+#required input {
+    width: 80px;
+}
+
+#optional {
     display: inline-block;
-    width: 108px;
+    width: 125px;
     vertical-align: text-top;
+}
+
+#optional input {
+    width: 80px;
+}
+
+#tradeForm .form-action {
+    width: 70px;
+    padding: 5px;
+}
+
+#tradeForm #cancel{
+    display: none;
+    width: 58px;
 }
 
 #txListContainer {
@@ -128,11 +153,11 @@
     border-bottom: 1px solid #ccc;
 }
 
-#tradeTemplate, #orderTemplate {
+#templates {
     display: none;
 }
 
-#txList .openTrade {
+#txList .openTrade, #txList .openOrder {
     padding: 5px;
     font-size: 14px;
     color: #676767;
@@ -145,13 +170,36 @@
     font-weight: bold;
 }
 
-#txList .instrument, #txList .price, #txList .expiry, #txList .takeProfit, #txList .stopLoss {
+#txList .instrument, #txList .price, #txList .expiry, #txList .takeProfit, #txList .stopLoss, #txList .trailingStop, #txList .upperBound, {
     margin-right: 8px;
 }
 
-#txList .oa-close-btn {
+#txList .units, #txList .expiry, #txList .takeProfit, #txList .stopLoss, #txList .trailingStop, #txList .upperBound, #txList .lowerBound {
+    color: #bcbcbc;
+}
+
+#txList input.units, #txList input.expiry, #txList input.takeProfit, #txList input.stopLoss, #txList input.trailingStop, #txList input.upperBound, #txList input.lowerBound {
+    width: 50px;
+    margin-bottom: 0px;
+    height: 12px;
+}
+
+#txList .changed {
+    color: rgb(0,200,200);
+    font-weight: bold
+    font-style: italic;
+}
+
+#txList .oa-open-tx-actions {
     float: right;
     opacity: 0.65;
+}
+
+#txList .oa-open-tx-actions input {
+    display: none;
+    height: 21px;
+    margin-top: -3px;
+    padding: 0px 8px;
 }
 
 #rates form {
@@ -163,19 +211,20 @@
 }
 
 #rates #ratesSelector {
-    margin: 7px 0px 0px 0px;
+    margin: 5px 0px 0px 0px;
 }
 
 #rates #ratesListContainer {
-    margin: 7px 0px;    
+    margin: 5px 0px;    
     border: 1px solid #ccc;
     max-height: 810px;
     overflow-y: scroll;
 }
 
 #rates #pairsNotSelected, #rates #pairsSelected {
+    width: 160px;
     height: 300px;
-    margin: 0px 10px;
+    margin: 0px;
 }
 
 #rates .rates-selector-btn-container {
@@ -185,8 +234,8 @@
 
 #rates .rates-selector-btn {
     display: block;
-    width: 125px;
-    margin-top: 5px;
+    width: 120px;
+    margin: 5px 5px 0px;
 }
 
 #rates #ratesForm {
@@ -199,7 +248,7 @@
 
 #ratesList .pair-rate {
     display: inline-block;
-    width: 46%;
+    width: 45%;
     min-width: 164px;
     margin: 4px;
     border: 1px solid #ddd;
@@ -220,7 +269,7 @@
 
 #ratesList .ask {
     display: inline-block;
-    margin-right: 20px;
+    margin-right: 5px;
 }
 
 #ratesList .bid {
