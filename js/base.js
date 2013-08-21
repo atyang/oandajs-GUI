@@ -65,10 +65,18 @@ function getExpiryFromHours(hours) {
     return expiry.toISOString();
 }
 
-function getHoursFromExpiry(expiry) {        
-    var now = new Date();
-    var expiry = new Date(expiry);
-    return ((expiry.getTime() - now.getTime()) / millisecondsInAnHour);
+function alertResponse(response, type) {
+    if (response['error']) {
+        alert(response['error'].message);
+    } else {
+        if (type == 'trade') {
+            getTradeList();
+        } else {
+            getOrderList();
+        }
+        
+        alert('A trade or order has been created!');
+    }
 }
 
 function convertToInput($span) {
@@ -134,11 +142,6 @@ function enableOpenTxSideAndType() {
     });
 }
 
-function disableOpenTxSideAndType() {
-    $('#transactionSide div').unbind('click');
-    $('#transactionType div').unbind('click');
-}
-
 function printPairForTrade($selector, pair) {
     $selector.append('<option value="'+pair.instrument+'">'+pair.displayName+'</option>');
 }
@@ -173,44 +176,19 @@ function setTxSide(sideBtn) {
     }
 }
 
-function alertResponse(response, type) {
-    if (response['error']) {
-        alert(response['error'].message);
-    } else {
-        if (type == 'trade') {
-            getTradeList();
-        } else {
-            getOrderList();
-        }
-        
-        alert('A trade or order has been created!');
-    }
-}
-
-function fillField(k, v, disabled) {
+function fillField(k, v) {
     if (k == 'instrument') {
-        $tradeForm.find('#pairSelector').prop('disabled',disabled).find('option[value='+v+']').prop('selected',true);
+        $tradeForm.find('#pairSelector').find('option[value='+v+']').prop('selected',true);
     } else if (k == 'side') {
         $('#transactionSide div:contains("'+v.substr(0,1).toUpperCase()+v.substr(1)+'")').click();
-        if(disabled) {
-            $('#transactionSide .btn').addClass('disabled');
-        }
     } else {
-        $tradeForm.find('input[name='+k+']').val(v).prop('disabled',disabled);
+        $tradeForm.find('input[name='+k+']').val(v);
     }
 }
 
-function fillTradeForm(params) {
-    var fields = {};
-    
+function fillTradeForm(params) {    
     $.each(params, function(i, obj) {
-        if (i == 'disabled') {
-            $.each(obj, function(key, value) {                
-                fillField(key, value, true);
-            });
-        } else {
-            fillField(i, obj, false);
-        }
+        fillField(i, obj);
     });
 }
 
@@ -241,6 +219,7 @@ function tradeAction(form) {
 }
 
 // Rates List functions
+// refactor this at some point
 function startRates() {
     setTimeout(function() {updatePairsFromAll()}, refreshTime);
     getRates();
@@ -532,12 +511,19 @@ function printPlOrDistance(obj) {
     });
 }
 
+function getList() {
+    if (getListType() == 'trades') {
+        getTradeList();
+    } else if (getListType() == 'orders') {
+        getOrderList();
+    }
+}
+
 function setListType() {        
     $('#listType div').bind('click',function() {
         var type = this.innerHTML.toLowerCase();
     
-        $listType.val(type);
-        
+        $listType.val(type);        
         getList();
     });
 }
@@ -545,14 +531,6 @@ function setListType() {
 function setListTypeBtn($btn) {
     $btn.parent().find('.active').removeClass('active');
     $btn.addClass('active');
-}
-
-function getList() {
-    if (getListType() == 'trades') {
-        getTradeList();
-    } else if (getListType() == 'orders') {
-        getOrderList();
-    }
 }
 
 function buildNewTx(fields, obj, $newTx) {
@@ -654,8 +632,10 @@ function allowModifyOrder() {
 function createAccount(form) {
     var currency = $(form).serializeArray()[0].value || 'USD';
     OANDA.account.register(currency, function(response) {
-        $('#accountId').val(response['accountId']);
-        $('#useAccount').submit();
+        activeAccountId = response['accountId'];
+        
+        startAccount();
+        startList();
     });
 }
 

@@ -1,6 +1,0 @@
-{% extends "base.html" %}
-
-{% block content %}
-<h1>Account Not Set</h1>
-<p>You have not set an account yet. Go to the "Accounts" tab!</p>
-{% endblock %}
