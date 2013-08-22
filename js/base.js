@@ -15,8 +15,12 @@ var $listType;
 var $txList;
 var $tradeTemplate;
 var $orderTemplate;
+var $positionTemplate;
+var $transactionTemplate;
 var openTradeFields;
 var openOrderFields;
+var openPositionFields;
+var openTransactionFields;
 var refreshTime = 250;
 var GREEN = 'rgb(0,220,0)';
 var FADEDGREEN = 'rgb(180,250,180)';
@@ -44,7 +48,7 @@ function resizeSidesContent($lSide, $rSide) {
     var rWidth = $rSide.width();
     
     if ($('#trades #txListContainer').length != 0) {
-        $('#trades .btn-group .btn').width((rWidth-3)/2);
+        $('#trades .btn-group .btn').width((rWidth-5)/4);
     }
     
     $tradeForm.find('.btn.txType').width((lWidth-2)/2);
@@ -224,18 +228,20 @@ function startRates() {
     setTimeout(function() {updatePairsFromAll()}, refreshTime);
     getRates();
     runRates = updateRates();
-    toggleRatesSelector();
+    //toggleRatesSelector();
 }
 
 function printPairToSelect(obj) {
     $pairsNotSelected.append('<option value="'+obj.instrument+'">'+obj.displayName+'</options>');
 }
 
+/*
 function toggleRatesSelector() {
     $('#rates .toggle').bind('click',function() {
         $('#ratesSelector').slideToggle();
     });
 }
+*/
 
 function moveSelectedPairs(list, $dest) {
     $.each(list, function() {
@@ -320,8 +326,8 @@ function removePairDiv(pairsList) {
 }
 
 function updateSelectedPairsList() {
+    $('#close').click();
     pairsSelectedList = [];
-    $('#ratesSelector').slideUp();
     
     $pairsSelected.find('option').each(function(i, obj) {
         pairsSelectedList.push(obj.getAttribute('value'));
@@ -422,20 +428,10 @@ function getListType() {
     return $listType.val();
 }
 
-function getOpenTradeFields($trade) {
+function getTemplateFields($template) {
     var fieldsList = [];
     
-    $trade.find("span[class]").each(function(i, obj) {
-        fieldsList.push(obj.className);
-    });
-    
-    return fieldsList;
-}
-
-function getOpenOrderFields($order) {
-    var fieldsList = [];
-    
-    $order.find("span[class]").each(function(i, obj) {
+    $template.find("span[class]").each(function(i, obj) {
         fieldsList.push(obj.className);
     });
     
@@ -487,13 +483,19 @@ function getPl($tx, obj) {
 }
 
 function calculateDistance($tx, obj) {
-    var $dist = $tx.find('.distance');    
-    var price = parseFloat($tx.find('.price').html());
+    var $dist = $tx.find('.distance');
+    var price;
+    
+    if ($tx.find('.price').html().length > 0) {
+        price = parseFloat($tx.find('.price').html());
+    } else {
+        price = parseFloat($tx.find('.price').val());
+    }
 
     if ($tx.find('.side').html() == 'Long') {
-        $dist.html(Math.abs(((obj['ask']-price)).toFixed(4)));
+        $dist.html(Math.abs(((obj['ask']-price)).toFixed(6)));
     } else {        
-        $dist.html(Math.abs(((price-obj['bid'])).toFixed(4)));
+        $dist.html(Math.abs(((price-obj['bid'])).toFixed(6)));
     }
 }
 
@@ -516,6 +518,10 @@ function getList() {
         getTradeList();
     } else if (getListType() == 'orders') {
         getOrderList();
+    } else if (getListType() == 'positions') {
+        getPositionList();
+    } else if (getListType() == 'transactions') {
+        getTransactionList();
     }
 }
 
@@ -533,12 +539,12 @@ function setListTypeBtn($btn) {
     $btn.addClass('active');
 }
 
-function buildNewTx(fields, obj, $newTx) {
+function buildNewOpenTx(fields, obj, $newTx) {
     $.each(fields, function(i, param) {
         var value = obj[param];
         
         if (param == 'instrument') {
-            value = obj[param].replace('_','/');
+            value = value.replace('_','/');
         }
 
         if (value == 'buy') {
@@ -550,29 +556,48 @@ function buildNewTx(fields, obj, $newTx) {
         }
     });
     
-    $newTx.attr('id',obj['id']);    
+    if (obj['id']) {
+        $newTx.attr('id',obj['id']);
+    }
+    
     $newTx.find('i').bind('click',function() {
         if ($newTx.hasClass('openTrade')) {
             closeTrade(obj['id']);
-        } else {
+        } else if ($newTx.hasClass('openOrder')) {
             closeOrder(obj['id']);
+        } else {
+            closePosition(obj['instrument']);
         }
     });
 }
 
 function printOpenTrade(trade) {
     var $newTrade = $tradeTemplate.clone().removeAttr('id');
-    buildNewTx(openTradeFields, trade, $newTrade);
+    buildNewOpenTx(openTradeFields, trade, $newTrade);
     
     $newTrade.appendTo($txList);
 }
 
 function printOpenOrder(order) {
     var $newOrder = $orderTemplate.clone().removeAttr('id');
-    buildNewTx(openOrderFields, order, $newOrder);
+    buildNewOpenTx(openOrderFields, order, $newOrder);
 
     $newOrder.appendTo($txList);
 }
+
+function printOpenPosition(position) {
+    var $newPosition = $positionTemplate.clone().removeAttr('id');
+    buildNewOpenTx(openPositionFields, position, $newPosition);
+    
+    $newPosition.appendTo($txList);
+}
+
+/* might need a custom build ftn to deal with transactionList
+function printTransaction(transaction) {
+    var $newTransaction = $transactionTemplate.clone().removeAttr('id');
+    $newTransaction.appendTo($txList);
+}
+*/
 
 function changeSideColor() {
     $('#txList span.side').each(function() {
@@ -717,6 +742,33 @@ function getOrderList() {
     });
 }
 
+function getPositionList() {
+    OANDA.position.list(activeAccountId, function(response) {
+        setListTypeBtn($('#listPositions'));
+        $txList.html('');
+        
+        $.each(response['positions'], function(i, obj) {
+            printOpenPosition(obj);
+            changeSideColor();
+        });
+    });
+}
+
+function closePosition(instr) {
+    OANDA.position.close(activeAccountId, instr, function(response) {
+        alertResponse(response, 'trade');
+    });
+}
+
+function getTransactionList() {
+    setListTypeBtn($('#listTransactions'));
+    $txList.html('');
+    
+    $.each(response['transactions'], function(i, obj) {
+        printTransaction(obj);
+    });
+}
+
 function createTrade(d) {    
     OANDA.trade.open(activeAccountId, d['instrument'], d['units'], d['side'], d['opt'], function(response) {
         //create a proper alert with return info, or some other way of notifying the client of trade creation
@@ -776,7 +828,7 @@ function modifyOrder($openOrder) {
 // After document loads
 $(function() {
     getPairsList(pairsList);
-    activeAccountId = $('#accountId').val();    
+    activeAccountId = 5807895;//$('#accountId').val();    
     accSummaryFields = getDisplayedAccountFields($('#accountSummary'));
     $tradeForm = $('#tradeForm');
     $pairsSelected = $('#pairsSelected');
@@ -786,9 +838,12 @@ $(function() {
     $txList = $('#txList');
     $rateTemplate = $('#rateTemplate');
     $tradeTemplate = $('#tradeTemplate');
-    $orderTemplate = $('#orderTemplate');    
-    openTradeFields = getOpenTradeFields($tradeTemplate);
-    openOrderFields = getOpenOrderFields($orderTemplate);
+    $orderTemplate = $('#orderTemplate'); 
+    $positionTemplate = $('#positionTemplate');
+    //$transactionTemplate = $('#transactionTemplate');   
+    openTradeFields = getTemplateFields($tradeTemplate);
+    openOrderFields = getTemplateFields($orderTemplate);
+    openPositionFields = getTemplateFields($positionTemplate);
     
     windowResize();    
     startAccount();

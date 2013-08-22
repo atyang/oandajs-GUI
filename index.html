@@ -141,21 +141,24 @@
                 </div>
 	        </div>	        
             <div id="rates" class="span4 oa-container">
-                <div class="btn toggle">Select Pairs</div>
-                <div id="ratesSelector" style="display:none;">
-                    <select id="pairsNotSelected" multiple="multiple">
-                    </select>
-                    <div class="rates-selector-btn-container">
-                        <input type="button" class="btn rates-selector-btn" value="Add &gt;" onclick="addPair()" />
-                        <input type="button" class="btn rates-selector-btn" value="Add All &gt;&gt;" onclick="addAllPairs()" />
-                        <input type="button" class="btn rates-selector-btn" value="&lt; Remove" onclick="removePair()" />
-                        <input type="button" class="btn rates-selector-btn" value="&lt;&lt; Remove All" onclick="removeAllPairs()" />
-                        <input type="submit" class="btn rates-selector-btn" value="Update" form="ratesForm" />
-                    </div>
-                    <form id="ratesForm" onSubmit="updateSelectedPairsList();return false;">
-                        <select id="pairsSelected" name="pairsSelected" multiple="multiple">
+                <a href="#ratesModal" class="btn toggle">Select Pairs</a>
+                <div id="ratesModal" class="modalDialog">
+                    <div id="ratesSelector">
+                        <a id="close" href="#" title="Close" class="close">X</a>
+                        <select id="pairsNotSelected" multiple="multiple">
                         </select>
-                    </form>
+                        <div class="rates-selector-btn-container">
+                            <input type="button" class="btn rates-selector-btn" value="Add &gt;" onclick="addPair()" />
+                            <input type="button" class="btn rates-selector-btn" value="Add All &gt;&gt;" onclick="addAllPairs()" />
+                            <input type="button" class="btn rates-selector-btn" value="&lt; Remove" onclick="removePair()" />
+                            <input type="button" class="btn rates-selector-btn" value="&lt;&lt; Remove All" onclick="removeAllPairs()" />
+                            <input type="submit" class="btn rates-selector-btn" value="Update" form="ratesForm" />
+                        </div>
+                        <form id="ratesForm" onSubmit="updateSelectedPairsList();return false;">
+                            <select id="pairsSelected" name="pairsSelected" multiple="multiple">
+                            </select>
+                        </form>
+                    </div>
                 </div>
                 <div id="ratesListContainer">
                     <div id="ratesList">
@@ -176,6 +179,8 @@
                         <div id="listType" class="btn-group oa-full-width">
                             <div id="listTrades" class="btn active">Trades</div>
                             <div id="listOrders" class="btn">Orders</div>
+                            <div id="listPositions" class="btn">Positions</div>
+                            <div id="listTransactions" class="btn">Transactions</div>
                         </div>
                         <div id="templates">
                             <div id="tradeTemplate" class="openTrade">
@@ -222,6 +227,24 @@
                                         LB: <span class="lowerBound"></span>
                                     </div>
                                 </div>
+                            </div>
+                            <div id="positionTemplate" class="openPosition">
+                                <div class="openTxFields">
+                                    <div>
+                                        <span class="instrument"></span>
+                                        <span class="units"></span> units
+                                        <span class="oa-open-tx-actions">
+                                            <span class="profit"></span>
+                                            <i class="icon-remove"></i>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span class="side"></span> @
+                                        <span class="avgPrice"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="transactionTemplate" class="openTransaction">
                             </div>
                         </div>
                         <div id="txList">
