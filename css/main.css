@@ -43,6 +43,7 @@
 
 #accountSummary {
     border: 1px solid #ccc;
+    margin-bottom: 10px;
 }
 
 #createTrade {
@@ -290,7 +291,7 @@
 #rates #ratesListContainer {
     margin: 5px 0px;    
     border: 1px solid #ccc;
-    max-height: 594px;
+    max-height: 584px;
     overflow-y: scroll;
 }
 
@@ -365,4 +366,16 @@
 
 .ask div {
     font-size: 10px;
+}
+
+#candles {
+    margin-top: 10px;
+}
+
+#candles #chart {
+    height: 283px;
+}
+
+#candles div#control {
+   display: none;
 }

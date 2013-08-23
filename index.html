@@ -10,6 +10,12 @@
 	<script type="text/javascript" src="http://code.jquery.com/color/jquery.color-2.1.2.min.js"></script>
 	<script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="js/oanda.js"></script>
+	<script src="https://www.google.com/jsapi"></script>
+	<script src="js/OCandlestickChart.js"></script>
+	<script>
+        google.load("visualization", "1.1", {packages:["corechart, controls"]});
+        OANDA.baseURL = "http://api-sandbox.oanda.com";
+    </script>
     <!--[if IE]>
                 <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
@@ -245,15 +251,26 @@
                                 </div>
                             </div>
                             <div id="transactionTemplate" class="openTransaction">
+                                <!-- Need to create a template for transactions -->
+                                Not yet implemented.
                             </div>
                         </div>
                         <div id="txList">
+                            <!-- Trades/Orders/Positions/Transactions List will be displayed here -->
                         </div>
                     </div>  
                 </div>
                 <div id="candles">
-                    <h1>Candles</h1>
-                    <p>Candlestick graph here.</p>
+                    <select id="chartInstrumentSelector"></select>
+                    <div id="error">
+                        <!-- Error messages will be displayed here -->
+                    </div>
+                    <div id="chart">
+                        <!-- Candlestick chart will be displayed here -->
+                    </div>
+                    <div id="control">
+                        <!-- Line chart control will be dispalyed here -->
+                    </div>
                 </div>
             </div>
         </div>

@@ -232,6 +232,7 @@ function startRates() {
 
 function printPairToSelect(obj) {
     $pairsNotSelected.append('<option value="'+obj.instrument+'">'+obj.displayName+'</options>');
+    $('#chartInstrumentSelector').append('<option value="'+obj.instrument+'">'+obj.displayName+'</options>');
 }
 
 function moveSelectedPairs(list, $dest) {
@@ -678,6 +679,7 @@ function getPairsList() {
             printPairToSelect(obj);
         });
         
+        $('#chartInstrumentSelector option[value=EUR_USD]').prop('selected',true);       
     });
 }
 
@@ -758,9 +760,15 @@ function getTransactionList() {
     setListTypeBtn($('#listTransactions'));
     $txList.html('');
     
-    $.each(response['transactions'], function(i, obj) {
-        printTransaction(obj);
+    /*
+    OANDA.transaction.list(activeAccountId, [], function(response) {
+        $.each(response['transactions'], function(i, obj) {
+            printTransaction(obj);
+        });
     });
+    */
+    
+    $txList.append($transactionTemplate.removeAttr('id'));
 }
 
 function createTrade(d) {    
@@ -821,8 +829,10 @@ function modifyOrder($openOrder) {
 
 // After document loads
 $(function() {
+    $('#accountId').val(5807895);
+    
     getPairsList(pairsList);
-    activeAccountId = 5807895;//$('#accountId').val();    
+    activeAccountId = $('#accountId').val();
     accSummaryFields = getDisplayedAccountFields($('#accountSummary'));
     $tradeForm = $('#tradeForm');
     $pairsSelected = $('#pairsSelected');
@@ -834,7 +844,7 @@ $(function() {
     $tradeTemplate = $('#tradeTemplate');
     $orderTemplate = $('#orderTemplate'); 
     $positionTemplate = $('#positionTemplate');
-    //$transactionTemplate = $('#transactionTemplate');   
+    $transactionTemplate = $('#transactionTemplate');   
     openTradeFields = getTemplateFields($tradeTemplate);
     openOrderFields = getTemplateFields($orderTemplate);
     openPositionFields = getTemplateFields($positionTemplate);
@@ -844,4 +854,16 @@ $(function() {
     enableOpenTxSideAndType();
     startRates();
     startList();
+    
+    var now = new Date();
+    now.setSeconds(now.getSeconds() - 100);
+    var chart = new OCandlestickChart(document.getElementById('candles'), 
+                    document.getElementById('chart'), document.getElementById('control'), document.getElementById('error'), {'startTime':now,'granularity':'S5'});
+    google.setOnLoadCallback( function() { chart.render(); } );
+    
+    $('#chartInstrumentSelector').change(function() {
+        chart.setInstrument($('#chartInstrumentSelector').val());
+    });
+    
+    chart.streamingEnabled = true;
 });
