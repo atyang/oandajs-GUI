@@ -228,20 +228,11 @@ function startRates() {
     setTimeout(function() {updatePairsFromAll()}, refreshTime);
     getRates();
     runRates = updateRates();
-    //toggleRatesSelector();
 }
 
 function printPairToSelect(obj) {
     $pairsNotSelected.append('<option value="'+obj.instrument+'">'+obj.displayName+'</options>');
 }
-
-/*
-function toggleRatesSelector() {
-    $('#rates .toggle').bind('click',function() {
-        $('#ratesSelector').slideToggle();
-    });
-}
-*/
 
 function moveSelectedPairs(list, $dest) {
     $.each(list, function() {
@@ -333,6 +324,8 @@ function updateSelectedPairsList() {
         pairsSelectedList.push(obj.getAttribute('value'));
     });
     
+    window.location.href = '#';
+
     updatePairsFromAll();
 }
 
@@ -757,6 +750,7 @@ function getPositionList() {
 function closePosition(instr) {
     OANDA.position.close(activeAccountId, instr, function(response) {
         alertResponse(response, 'trade');
+        removePairFromOpenTx(response['instrument'], openTradePairs);
     });
 }
 

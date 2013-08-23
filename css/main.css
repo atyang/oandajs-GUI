@@ -246,18 +246,18 @@
 	pointer-events: auto;
 }
 
-#rates .modalDialog > div {
+#rates .modalDialog > #ratesSelector {
 	position: relative;
 	margin: 10% auto;
 	border-radius: 10px;
 	padding: 10px;
 	background: #fff;
-	background: -moz-linear-gradient(#fff, #999);
-	background: -webkit-linear-gradient(#fff, #999);
-	background: -o-linear-gradient(#fff, #999);
+	background: -moz-linear-gradient(#fff, #ddd);
+	background: -webkit-linear-gradient(#fff, #ddd);
+	background: -o-linear-gradient(#fff, #ddd);
 }
 
-.close {
+#rates .close {
 	background: #606061;
 	color: #FFFFFF;
 	line-height: 25px;
@@ -268,16 +268,17 @@
 	width: 24px;
 	text-decoration: none;
 	font-weight: bold;
+	border: 2px solid white;
 	-webkit-border-radius: 12px;
 	-moz-border-radius: 12px;
-	border-radius: 12px;
+	border-radius: 15px;
 	-moz-box-shadow: 1px 1px 3px #000;
 	-webkit-box-shadow: 1px 1px 3px #000;
 	box-shadow: 1px 1px 3px #000;
 	opacity: 1;
 }
 
-.close:hover { 
+#rates .close:hover { 
     background: #00d9ff; 
     opacity: 1;
 }
@@ -289,7 +290,7 @@
 #rates #ratesListContainer {
     margin: 5px 0px;    
     border: 1px solid #ccc;
-    max-height: 810px;
+    max-height: 594px;
     overflow-y: scroll;
 }
 
